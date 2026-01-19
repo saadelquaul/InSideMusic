@@ -1,0 +1,198 @@
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { AlbumService, CategoryService } from '../../services';
+import { CreateAlbumDto, UpdateAlbumDto } from '../../models';
+
+@Component({
+  selector: 'app-album-form',
+  standalone: true,
+  imports: [FormsModule, RouterLink],
+  template: `
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+      <div class="mb-8">
+        <a routerLink="/albums" class="text-indigo-600 hover:text-indigo-800 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+          </svg>
+          Back to Albums
+        </a>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-md p-8">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">
+          {{ isEditMode() ? 'Edit Album' : 'Add New Album' }}
+        </h1>
+
+        <form (ngSubmit)="onSubmit()" #albumForm="ngForm">
+          <div class="space-y-6">
+            <!-- Title -->
+            <div>
+              <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                [(ngModel)]="formData.title"
+                required
+                minlength="3"
+                maxlength="50"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter album title"
+              >
+              <p class="mt-1 text-xs text-gray-500">Title must be between 3 and 50 characters</p>
+            </div>
+
+            <!-- Artist -->
+            <div>
+              <label for="artist" class="block text-sm font-medium text-gray-700 mb-1">Artist *</label>
+              <input
+                type="text"
+                id="artist"
+                name="artist"
+                [(ngModel)]="formData.artist"
+                required
+                class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter artist name"
+              >
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                [(ngModel)]="formData.description"
+                rows="3"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter album description"
+              ></textarea>
+            </div>
+
+            <!-- Category -->
+            <div>
+              <label for="categoryId" class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+              <select
+                id="categoryId"
+                name="categoryId"
+                [(ngModel)]="formData.categoryId"
+                required
+                class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              >
+                <option value="">Select a category</option>
+                @for (category of categories(); track category.id) {
+                  <option [value]="category.id">{{ category.name }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Release Date -->
+            <div>
+              <label for="releaseDate" class="block text-sm font-medium text-gray-700 mb-1">Release Date</label>
+              <input
+                type="date"
+                id="releaseDate"
+                name="releaseDate"
+                [(ngModel)]="releaseDateString"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              >
+            </div>
+
+            <!-- Cover URL -->
+            <div>
+              <label for="coverUrl" class="block text-sm font-medium text-gray-700 mb-1">Cover Image URL</label>
+              <input
+                type="url"
+                id="coverUrl"
+                name="coverUrl"
+                [(ngModel)]="formData.coverUrl"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="https://example.com/cover.jpg"
+              >
+              @if (formData.coverUrl) {
+                <div class="mt-3">
+                  <img [src]="formData.coverUrl" alt="Cover preview" class="w-32 h-32 object-cover rounded-lg shadow">
+                </div>
+              }
+            </div>
+
+            <!-- Submit Button -->
+            <div class="flex gap-4 pt-4">
+              <button
+                type="submit"
+                [disabled]="!albumForm.valid"
+                class="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                {{ isEditMode() ? 'Update Album' : 'Create Album' }}
+              </button>
+              <a
+                routerLink="/albums"
+                class="flex-1 text-center bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                Cancel
+              </a>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  `
+})
+export class AlbumFormComponent implements OnInit {
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly albumService = inject(AlbumService);
+  private readonly categoryService = inject(CategoryService);
+
+  protected readonly categories = this.categoryService.categories;
+  protected readonly isEditMode = signal(false);
+
+  private albumId: string | null = null;
+  releaseDateString = '';
+
+  formData: CreateAlbumDto = {
+    title: '',
+    artist: '',
+    description: '',
+    categoryId: '',
+    coverUrl: ''
+  };
+
+  ngOnInit() {
+    this.albumId = this.route.snapshot.paramMap.get('id');
+
+    if (this.albumId) {
+      this.isEditMode.set(true);
+      const album = this.albumService.getById(this.albumId);
+      if (album) {
+        this.formData = {
+          title: album.title,
+          artist: album.artist,
+          description: album.description || '',
+          categoryId: album.categoryId,
+          coverUrl: album.coverUrl || ''
+        };
+        if (album.releaseDate) {
+          this.releaseDateString = new Date(album.releaseDate).toISOString().split('T')[0];
+        }
+      } else {
+        this.router.navigate(['/albums']);
+      }
+    }
+  }
+
+  onSubmit() {
+    const dto: CreateAlbumDto | UpdateAlbumDto = {
+      ...this.formData,
+      releaseDate: this.releaseDateString ? new Date(this.releaseDateString) : undefined
+    };
+
+    if (this.isEditMode() && this.albumId) {
+      this.albumService.update(this.albumId, dto as UpdateAlbumDto);
+    } else {
+      this.albumService.create(dto as CreateAlbumDto);
+    }
+    this.router.navigate(['/albums']);
+  }
+}

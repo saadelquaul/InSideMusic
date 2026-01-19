@@ -2,7 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Track } from '../models';
 
 
-const DB_NAME = 'MusicStreamDB';
+const DB_NAME = 'InSideMusicDB';
 const DB_VERSION = 1;
 const TRACKS_STORE = 'tracks';
 const AUDIO_FILES_STORE = 'audioFiles';

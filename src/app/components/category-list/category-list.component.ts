@@ -1,0 +1,215 @@
+import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CategoryService, AlbumService, TrackService } from '../../services';
+import { Category, CreateCategoryDto } from '../../models';
+
+@Component({
+  selector: 'app-category-list',
+  standalone: true,
+  imports: [FormsModule],
+  template: `
+    <div class="container mx-auto px-4 py-8">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Categories</h1>
+        <button
+          (click)="showForm.set(!showForm())"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+        >
+          @if (showForm()) {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+            Cancel
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            Add Category
+          }
+        </button>
+      </div>
+
+      <!-- Add/Edit Form -->
+      @if (showForm()) {
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+          <h2 class="text-xl font-bold text-gray-900 mb-4">
+            {{ editingCategory() ? 'Edit Category' : 'Add New Category' }}
+          </h2>
+          <form (ngSubmit)="onSubmit()" #categoryForm="ngForm" class="space-y-4">
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                [(ngModel)]="formData.name"
+                required
+                minlength="2"
+                maxlength="30"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter category name"
+              >
+            </div>
+            <div>
+              <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                id="description"
+                name="description"
+                [(ngModel)]="formData.description"
+                rows="2"
+                class="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                placeholder="Enter category description"
+              ></textarea>
+            </div>
+            <div class="flex gap-4">
+              <button
+                type="submit"
+                [disabled]="!categoryForm.valid"
+                class="bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+              >
+                {{ editingCategory() ? 'Update' : 'Create' }}
+              </button>
+              @if (editingCategory()) {
+                <button
+                  type="button"
+                  (click)="cancelEdit()"
+                  class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-2 rounded-lg font-medium transition-colors"
+                >
+                  Cancel Edit
+                </button>
+              }
+            </div>
+          </form>
+        </div>
+      }
+
+      <!-- Categories Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (category of categories(); track category.id) {
+          <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-shadow duration-300">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-lg text-gray-900">{{ category.name }}</h3>
+                    @if (category.description) {
+                      <p class="text-gray-500 text-sm mt-1">{{ category.description }}</p>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-gray-100">
+              <div class="flex items-center justify-between text-sm text-gray-500">
+                <span>{{ getAlbumCount(category.id) }} albums</span>
+                <span>{{ getTrackCount(category.id) }} tracks</span>
+              </div>
+            </div>
+
+            <div class="flex gap-2 mt-4">
+              <button
+                (click)="editCategory(category)"
+                class="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
+              >
+                Edit
+              </button>
+              <button
+                (click)="deleteCategory(category.id)"
+                [disabled]="!canDelete(category.id)"
+                class="flex-1 px-3 py-2 bg-red-50 hover:bg-red-100 disabled:bg-gray-100 disabled:text-gray-400 text-red-600 rounded-lg text-sm font-medium transition-colors"
+                [title]="!canDelete(category.id) ? 'Cannot delete: category has albums or tracks' : ''"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      @if (categories().length === 0) {
+        <div class="text-center py-12">
+          <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+          </svg>
+          <h3 class="mt-4 text-lg font-medium text-gray-900">No categories found</h3>
+          <p class="mt-2 text-gray-500">Get started by adding a new category.</p>
+        </div>
+      }
+    </div>
+  `
+})
+export class CategoryListComponent {
+  private readonly categoryService = inject(CategoryService);
+  private readonly albumService = inject(AlbumService);
+  private readonly trackService = inject(TrackService);
+
+  protected readonly categories = this.categoryService.categories;
+  protected readonly showForm = signal(false);
+  protected readonly editingCategory = signal<Category | null>(null);
+
+  formData: CreateCategoryDto = {
+    name: '',
+    description: ''
+  };
+
+  getAlbumCount(categoryId: string): number {
+    return this.albumService.getByCategory(categoryId).length;
+  }
+
+  getTrackCount(categoryId: string): number {
+    return this.trackService.getByCategory(categoryId).length;
+  }
+
+  canDelete(categoryId: string): boolean {
+    return this.getAlbumCount(categoryId) === 0 && this.getTrackCount(categoryId) === 0;
+  }
+
+  editCategory(category: Category) {
+    this.editingCategory.set(category);
+    this.formData = {
+      name: category.name,
+      description: category.description || ''
+    };
+    this.showForm.set(true);
+  }
+
+  cancelEdit() {
+    this.editingCategory.set(null);
+    this.resetForm();
+  }
+
+  onSubmit() {
+    const editing = this.editingCategory();
+
+    if (editing) {
+      this.categoryService.update(editing.id, this.formData);
+    } else {
+      this.categoryService.create(this.formData);
+    }
+
+    this.resetForm();
+    this.showForm.set(false);
+    this.editingCategory.set(null);
+  }
+
+  deleteCategory(id: string) {
+    if (!this.canDelete(id)) return;
+
+    if (confirm('Are you sure you want to delete this category?')) {
+      this.categoryService.delete(id);
+    }
+  }
+
+  private resetForm() {
+    this.formData = {
+      name: '',
+      description: ''
+    };
+  }
+}

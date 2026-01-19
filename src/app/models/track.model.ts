@@ -34,5 +34,5 @@ export interface UpdateTrackDto {
 export const SUPPORTED_AUDIO_FORMATS = ['audio/mpeg', 'audio/wav', 'audio/ogg'];
 export const SUPPORTED_IMAGE_FORMATS = ['image/png', 'image/jpeg'];
 export const MAX_FILE_SIZE = 10 * 1024 * 1024;
-export const MAX_TITLE_SIZE = 50;
+export const MAX_TITLE_LENGTH = 50;
 export const MAX_DESCRIPTION_LENGTH = 200;
