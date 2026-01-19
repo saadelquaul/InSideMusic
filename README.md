@@ -1,59 +1,154 @@
-# InSideMusic
+# 🎵 InSideMusic 
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.5.
+<div align="center">
 
-## Development server
 
-To start a local development server, run:
 
-```bash
-ng serve
+A modern, elegant personal music player built with **Angular 21** and **Tailwind CSS**. Upload your tracks, organize them by categories, and enjoy your music anywhere.
+
+[![Angular](https://img.shields.io/badge/Angular-21.0.0-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
+</div>
+
+---
+
+## ✨ Features
+
+- 🎧 **Audio Player** - Full-featured audio player with play/pause, next/previous, shuffle, loop, and volume controls
+- 📤 **Upload Tracks** - Upload MP3, WAV, and OGG audio files (up to 10MB)
+- 🖼️ **Cover Images** - Add cover art to your tracks (PNG, JPEG)
+- 📂 **Categories** - Organize your music by custom categories
+- 🔍 **Search & Filter** - Search tracks by title, artist, or description and filter by category
+- 💾 **Local Storage** - All data stored locally using IndexedDB for offline access
+- 📱 **Responsive Design** - Beautiful UI that works on desktop and mobile
+- 🎨 **Modern UI** - Clean, gradient-based design with smooth transitions
+
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [npm](https://www.npmjs.com/) (v9 or higher)
+- [Angular CLI](https://angular.dev/tools/cli) (v21)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/InSideMusic.git
+   cd InSideMusic
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Start the development server**
+   ```bash
+   ng serve
+   ```
+
+4. **Open your browser**
+   Navigate to `http://localhost:4200/`
+
+---
+
+## 🛠️ Available Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm start` | Start development server |
+| `npm run build` | Build for production |
+| `npm run watch` | Build in watch mode |
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+├── app/
+│   ├── components/
+│   │   ├── album-detail/      # Album detail view
+│   │   ├── album-form/        # Album create/edit form
+│   │   ├── album-list/        # Albums listing
+│   │   ├── audio-player/      # Global audio player component
+│   │   ├── category-list/     # Categories management
+│   │   ├── home/              # Home dashboard
+│   │   ├── track-form/        # Track upload/edit form
+│   │   └── track-list/        # Music library
+│   ├── models/
+│   │   ├── album.model.ts     # Album interface
+│   │   ├── category.model.ts  # Category interface
+│   │   └── track.model.ts     # Track interface
+│   ├── services/
+│   │   ├── album.service.ts   # Album CRUD operations
+│   │   ├── audio-player.service.ts  # Audio playback management
+│   │   ├── category.service.ts      # Category CRUD operations
+│   │   ├── storage.service.ts       # IndexedDB storage
+│   │   └── track.service.ts         # Track CRUD operations
+│   ├── app.config.ts          # App configuration
+│   ├── app.html               # Root template
+│   ├── app.routes.ts          # Route definitions
+│   └── app.ts                 # Root component
+├── index.html
+├── main.ts
+└── styles.css
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## 🎨 Tech Stack
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+| Technology | Purpose |
+|------------|---------|
+| **Angular 21** | Frontend framework |
+| **TypeScript 5.9** | Type-safe JavaScript |
+| **Tailwind CSS 4** | Utility-first styling |
+| **RxJS** | Reactive programming |
+| **IndexedDB** | Client-side storage |
 
-```bash
-ng generate component component-name
-```
+---
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## 📋 Supported Formats
 
-```bash
-ng generate --help
-```
+### Audio Files
+- MP3 (`audio/mpeg`)
+- WAV (`audio/wav`)
+- OGG (`audio/ogg`)
 
-## Building
+### Image Files
+- PNG (`image/png`)
+- JPEG (`image/jpeg`)
 
-To build the project run:
+### Limits
+- Maximum file size: **10MB**
+- Maximum title length: **50 characters**
+- Maximum description length: **200 characters**
 
-```bash
-ng build
-```
+---
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## 🧩 Key Features in Detail
 
-## Running unit tests
+### Audio Player Service
+The audio player service provides:
+- Play, pause, resume functionality
+- Next/previous track navigation
+- Shuffle and loop modes
+- Volume control with mute
+- Progress tracking and seeking
+- Queue management
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+### Storage Service
+Uses IndexedDB for:
+- Storing audio files as blobs
+- Storing cover images
+- Persisting track metadata
+- Category management
+- Offline-first approach
