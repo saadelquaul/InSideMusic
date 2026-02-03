@@ -9,23 +9,23 @@ export const routes: Routes = [
   // Track routes
   {
     path: 'tracks',
-    loadComponent: () => import('./components/track-list/track-list.component').then(m => m.TrackListComponent),
+    loadComponent: () => import('./components/track-list/track-list').then(m => m.TrackList),
     title: 'Library - InSideMusic'
   },
   {
     path: 'tracks/new',
-    loadComponent: () => import('./components/track-form/track-form.component').then(m => m.TrackFormComponent),
+    loadComponent: () => import('./components/track-form/track-form').then(m => m.TrackForm),
     title: 'Upload Track - InSideMusic'
   },
   {
     path: 'tracks/:id/edit',
-    loadComponent: () => import('./components/track-form/track-form.component').then(m => m.TrackFormComponent),
+    loadComponent: () => import('./components/track-form/track-form').then(m => m.TrackForm),
     title: 'Edit Track - InSideMusic'
   },
   // Category routes
   {
     path: 'categories',
-    loadComponent: () => import('./components/category-list/category-list.component').then(m => m.CategoryListComponent),
+    loadComponent: () => import('./components/category-list/category-list').then(m => m.CategoryList),
     title: 'Categories - InSideMusic'
   },
   // Fallback
