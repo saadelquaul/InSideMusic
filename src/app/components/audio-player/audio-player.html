@@ -1,11 +1,4 @@
-import { Component, inject } from '@angular/core';
-import { AudioPlayerService } from '../../services';
 
-@Component({
-  selector: 'app-audio-player',
-  standalone: true,
-  imports: [],
-  template: `
     @if (audioPlayerService.currentTrack()) {
       <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
         <div class="max-w-7xl mx-auto">
@@ -64,6 +57,7 @@ import { AudioPlayerService } from '../../services';
                 </button>
 
                 <!-- Play/Pause -->
+                
                 <button
                   (click)="togglePlayPause()"
                   class="p-3 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg hover:shadow-xl transition-all"
@@ -155,48 +149,3 @@ import { AudioPlayerService } from '../../services';
       <!-- Spacer to prevent content from being hidden behind the player -->
       <div class="h-24"></div>
     }
-  `,
-  styles: [`
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #4f46e5;
-      cursor: pointer;
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: #4f46e5;
-      cursor: pointer;
-      border: none;
-    }
-  `]
-})
-export class AudioPlayerComponent {
-  protected readonly audioPlayerService = inject(AudioPlayerService);
-
-  togglePlayPause() {
-    if (this.audioPlayerService.isPlaying()) {
-      this.audioPlayerService.pause();
-    } else {
-      this.audioPlayerService.play();
-    }
-  }
-
-  onProgressClick(event: MouseEvent) {
-    const target = event.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const percent = ((event.clientX - rect.left) / rect.width) * 100;
-    this.audioPlayerService.seekToPercent(percent);
-  }
-
-  onVolumeChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.audioPlayerService.setVolume(parseFloat(input.value));
-  }
-}
